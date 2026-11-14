@@ -9,7 +9,14 @@
  * this points at production, which is the safe failure (it never tells Google
  * to index the staging host).
  */
-export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://example.com").replace(/\/+$/, "");
+export const SITE_URL = (
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  // Vercel fallbacks (system env vars): production domain, then this deployment's URL
+  (process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL && `https://${process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL}`) ||
+  (process.env.VERCEL_PROJECT_PRODUCTION_URL && `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`) ||
+  (process.env.VERCEL_URL && `https://${process.env.VERCEL_URL}`) ||
+  "https://example.com"
+).replace(/\/+$/, "");
 
 /** Only production should be indexed. Previews/staging get noindex + Disallow. */
 export const ALLOW_INDEXING = process.env.NEXT_PUBLIC_ALLOW_INDEXING === "true";
