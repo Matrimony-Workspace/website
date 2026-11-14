@@ -1,26 +1,231 @@
 @import "tailwindcss";
 
+/* ── Tokens — Divine Companion "rose & violet" (see DESIGN.md) ─────────── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --ink: #24132f; /* aubergine — all text on light */
+  --violet: #5b2a86; /* deep brand — footer, menu, primary buttons */
+  --violet-light: #7444a3; /* menu arc, hovers */
+  --rose: #f2709c; /* accent — CTAs on dark/photo, highlights */
+  --lilac: #ebe0fb; /* main content band */
+  --orchid: #d5c0f5; /* shapes on lilac */
+  --blush: #fce3ec; /* stories band, soft cards */
+  --petal: #f9c6d8; /* shapes on blush, tape labels, notes */
+  --mist: #fbf8fe; /* light surfaces, text on dark */
+  --header-h: 80px;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-ink: var(--ink);
+  --color-violet: var(--violet);
+  --color-violet-light: var(--violet-light);
+  --color-rose: var(--rose);
+  --color-lilac: var(--lilac);
+  --color-orchid: var(--orchid);
+  --color-blush: var(--blush);
+  --color-petal: var(--petal);
+  --color-mist: var(--mist);
+  --color-background: var(--mist);
+  --color-foreground: var(--ink);
+  /* Latin first; Devanagari / Urdu glyphs fall through to the native-script fonts */
+  --font-sans: var(--font-dm-sans), var(--font-deva), var(--font-urdu), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-bricolage), var(--font-deva), var(--font-urdu), ui-sans-serif, system-ui, sans-serif;
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* ── Base ───────────────────────────────────────────────────────────────── */
+body {
+  background: var(--mist);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 18px;
+  line-height: 25px;
+  overflow-x: clip;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--petal);
+  color: var(--ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--violet);
+  outline-offset: 3px;
+}
+
+/* Lenis (inlined from lenis/dist/lenis.css) */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis:not(.lenis-autoToggle).lenis-stopped {
+  overflow: clip;
+}
+.lenis [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
+}
+
+/* ── Utilities ──────────────────────────────────────────────────────────── */
+@utility shell {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 1450px;
+  padding-inline: 1.25rem;
+  @media (width >= 64rem) {
+    padding-inline: 2.5rem;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Primary pill: display 700 18/27, r50, 10.5×24 */
+@utility btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 50px;
+  padding: 10.5px 24px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 27px;
+  white-space: nowrap;
+  transition:
+    transform 0.4s var(--ease-expo),
+    background-color 0.3s,
+    color 0.3s;
+  &:hover {
+    transform: translateY(-2px);
+  }
+}
+
+/* Secondary: in-content link — bold, underlined */
+@utility text-link {
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+  transition: text-decoration-thickness 0.2s;
+  &:hover {
+    text-decoration-thickness: 2px;
+  }
+}
+
+/* ── Header: transparent over a hero photo, white bar once scrolled ─────── */
+.site-header {
+  --hdr-fg: var(--ink);
+  background: var(--mist);
+}
+body:has([data-hero-overlay]) .site-header {
+  margin-bottom: calc(var(--header-h) * -1);
+}
+body:has([data-hero-overlay]) .site-header:not(.is-scrolled) {
+  --hdr-fg: var(--mist);
+  background: transparent;
+}
+
+/* Ribbon dismissed (class set by the head script before paint). */
+.ribbon-closed .ribbon {
+  display: none;
+}
+
+/* ── Scroll reveal: hidden only when JS + motion are on ─────────────────── */
+.motion [data-reveal] {
+  opacity: 0;
+  transform: translateY(24px);
+}
+.motion [data-scale-in] {
+  opacity: 0;
+  transform: scale(0.92);
+}
+.motion [data-arrow-line],
+.motion [data-arrow-head],
+.motion [data-draw] {
+  /* paths use pathLength=1000 — GSAP rounds px values, so a length of 1 would only ever be 0 or 1 */
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+}
+
+/* Hero typed caret */
+.caret {
+  display: inline-block;
+  width: 0.08em;
+  height: 0.9em;
+  margin-left: 0.06em;
+  translate: 0 0.08em;
+  background: currentColor;
+  animation: caret 1s steps(1) infinite;
+}
+@keyframes caret {
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes dot-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.anim-heartbeat {
+  animation: heartbeat 1.8s ease-in-out infinite;
+}
+@keyframes heartbeat {
+  0%, 100% { transform: scale(1); }
+  15% { transform: scale(1.15); }
+  30% { transform: scale(1); }
+  45% { transform: scale(1.1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ── Photo masks (replace circles): mandap arch + scalloped bloom ──────── */
+.mask-arch {
+  border-radius: 999px 999px 28px 28px;
+}
+.mask-bloom {
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 3c7 0 11 7 16 9s13-1 17 5-1 12 1 17 9 9 9 16-7 11-9 16 1 13-5 17-12-1-17 1-9 9-16 9-11-7-16-9-13 1-17-5 1-12-1-17-9-9-9-16 7-11 9-16-1-13 5-17 12 1 17-1 9-9 16-9z'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 3c7 0 11 7 16 9s13-1 17 5-1 12 1 17 9 9 9 16-7 11-9 16 1 13-5 17-12-1-17 1-9 9-16 9-11-7-16-9-13 1-17-5 1-12-1-17-9-9-9-16 7-11 9-16-1-13 5-17 12 1 17-1 9-9 16-9z'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+}
+
+/* ── Native scripts ────────────────────────────────────────────────────── */
+/* Devanagari: matras sit above/below — give lines room, never squeeze tracking */
+html[lang="hi"] :is(h1, h2, h3, p, li, a, span, blockquote, button) {
+  letter-spacing: 0 !important;
+}
+html[lang="hi"] :is(h1, h2, h3, p, li, blockquote) {
+  line-height: 1.45 !important;
+}
+
+/* Urdu (Nastaliq): right-to-left, tall line-height, no letter-spacing (it breaks joining).
+   Font stacks stay Latin-first, so "Divine Companion" keeps Bricolage/DM Sans and
+   Urdu letters fall through to Noto Nastaliq automatically. */
+html[lang="ur"] body {
+  line-height: 1.9;
+}
+html[lang="ur"] :is(h1, h2, h3, p, li, a, span, blockquote, button, .font-display) {
+  letter-spacing: 0 !important;
+}
+html[lang="ur"] :is(h1, h2, h3, p, li, blockquote) {
+  line-height: 1.9 !important;
+}
+/* Mirror directional icons and the hand-drawn story arrows in RTL */
+[dir="rtl"] [data-dir-icon],
+[dir="rtl"] [data-arrow] {
+  transform: scaleX(-1);
 }
